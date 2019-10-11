@@ -114,7 +114,7 @@ namespace Application.Controllers
         public async Task<IActionResult> GetById(string id)
         {
             var bid = await _bidRepository.GetById(id);
-            var bidDto = _mapper.Map<BidDto>(bid);
+            var bidDto = _mapper.Map<IList<BidDto>>(bid);
             return Ok(bidDto);
         }
 
