@@ -17,6 +17,7 @@ namespace Application.Repositories
         Task Update(string id, Bid bidIn);
         Task Remove(Bid bidIn);
         Task Remove(string id);
+        Task<List<Bid>> GetByProjectId(string projectId);
     }
 
     public class BidRepository : IBidRepository
@@ -29,33 +30,15 @@ namespace Application.Repositories
                 _bids = dbContext.Bids;
         }
 
-        public async Task<List<Bid>> Get()
-        {
-            return await (await _bids.FindAsync(bid => true)).ToListAsync();
-        }
+        public async Task<List<Bid>> Get() => await (await _bids.FindAsync(bid => true)).ToListAsync();
+        public async Task<Bid> GetById(string id) => await (await _bids.FindAsync(bidding => bidding.Id == id)).FirstOrDefaultAsync();
+        public async Task<List<Bid>> GetByProject(string projectId) => await (await _bids.FindAsync(bid => bid.ProjectId == projectId)).ToListAsync();
+        public async Task<List<Bid>> GetByFreelancerId(string freelancerId) => await (await _bids.FindAsync(bid => bid.FreelancerId == freelancerId)).ToListAsync();
 
-        public async Task<Bid> GetById(string id)
-        {
-            return await (await _bids.FindAsync(bidding => bidding.Id == id)).FirstOrDefaultAsync();
-        }
-
-        public async Task<List<Bid>> GetByProject(string projectId)
-        {
-            return await (await _bids.FindAsync(bid => bid.ProjectId == projectId)).ToListAsync();
-        }
-
-        public async Task<List<Bid>> GetByFreelancerId(string freelancerId)
-        {
-            return await (await _bids.FindAsync(bid => bid.FreelancerId == freelancerId)).ToListAsync();
-        }
-
-        public async Task<List<Bid>> GetByProjectAndFreelancer(string projectId, string freelancerId)
-        {
-            return await (
-                await _bids.FindAsync(
-                    bid => bid.ProjectId == projectId && bid.FreelancerId == freelancerId)
-            ).ToListAsync();
-        }
+        public async Task<List<Bid>> GetByProjectAndFreelancer(string projectId, string freelancerId) => await (
+            await _bids.FindAsync(
+                bid => bid.ProjectId == projectId && bid.FreelancerId == freelancerId)
+        ).ToListAsync();
 
         public async Task<Bid> Create(Bid bid)
         {
@@ -63,19 +46,9 @@ namespace Application.Repositories
             return bid;
         }
 
-        public async Task Update(string id, Bid bidIn)
-        {
-            await _bids.ReplaceOneAsync(bidding => bidding.Id == id, bidIn);
-        }
-
-        public async Task Remove(Bid bidIn)
-        {
-            await _bids.DeleteOneAsync(bidding => bidding.Id == bidIn.Id);
-        }
-
-        public async Task Remove(string id)
-        {
-            await _bids.DeleteOneAsync(bidding => bidding.Id == id);
-        }
+        public async Task Update(string id, Bid bidIn) => await _bids.ReplaceOneAsync(bidding => bidding.Id == id, bidIn);
+        public async Task Remove(Bid bidIn) => await _bids.DeleteOneAsync(bidding => bidding.Id == bidIn.Id);
+        public async Task Remove(string id) => await _bids.DeleteOneAsync(bidding => bidding.Id == id);
+        public async Task<List<Bid>> GetByProjectId(string projectId) => await (await _bids.FindAsync(bid => bid.ProjectId == projectId)).ToListAsync();
     }
 }

@@ -38,8 +38,7 @@ namespace Application.Controllers
         public async Task<IActionResult> OpenBid([FromBody] BidCreationDto bidDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(new
-                    {message = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)});
+                return BadRequest(new { message = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
 
             var createBid = _mapper.Map<Bid>(bidDto);
             try
@@ -68,8 +67,7 @@ namespace Application.Controllers
                 return BadRequest(new MessageObj("Invalid id(s)"));
 
             if (!ModelState.IsValid)
-                return BadRequest(new
-                    {message = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)});
+                return BadRequest(new { message = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
 
             var updateBid = _mapper.Map<Bid>(bidDto);
             try
@@ -93,7 +91,6 @@ namespace Application.Controllers
             return Ok(bidDtos);
         }
 
-
         [HttpGet("freelancer/{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetByFreelancerId(string id)
@@ -101,6 +98,15 @@ namespace Application.Controllers
             var bids = await _bidRepository.GetByFreelancerId(id);
             var bidsDto = _mapper.Map<BidDto>(bids);
             return Ok(bidsDto);
+        }
+
+        [HttpGet("project/{projectId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetByProjectId([FromRoute] string projectId)
+        {
+            var bids = await _bidRepository.GetByProjectId(projectId);
+            var bidDtos = _mapper.Map<BidDto>(bids);
+            return Ok(bidDtos);
         }
 
         [HttpGet("{id}")]
