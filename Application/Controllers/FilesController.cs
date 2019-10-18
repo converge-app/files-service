@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,30 +21,30 @@ namespace Application.Controllers
 {
     [Route("api/[controller]")]
     [Authorize]
-    public class BiddingsController : ControllerBase
+    public class FilesController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly IBidRepository _bidRepository;
-        private readonly IBidService _bidService;
+        private readonly IFileRepository _fileRepository;
+        private readonly IFileservice _fileservice;
 
-        public BiddingsController(IBidService bidService, IBidRepository bidRepository, IMapper mapper)
+        public FilesController(IFileservice fileservice, IFileRepository fileRepository, IMapper mapper)
         {
-            _bidService = bidService;
-            _bidRepository = bidRepository;
+            _fileservice = fileservice;
+            _fileRepository = fileRepository;
             _mapper = mapper;
         }
 
         [HttpPost]
-        public async Task<IActionResult> OpenBid([FromBody] BidCreationDto bidDto)
+        public async Task<IActionResult> OpenFile([FromBody] FileCreationDto fileDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new { message = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
 
-            var createBid = _mapper.Map<Bid>(bidDto);
+            var createFile = _mapper.Map<File>(fileDto);
             try
             {
-                var createdBid = await _bidService.Open(createBid);
-                return Ok(createdBid);
+                var createdFile = await _fileservice.Open(createFile);
+                return Ok(createdFile);
             }
             catch (UserNotFound)
             {
@@ -60,21 +60,21 @@ namespace Application.Controllers
             }
         }
 
-        [HttpPut("{bidId}")]
-        public async Task<IActionResult> AcceptBid([FromHeader] string authorization, [FromRoute] string bidId, [FromBody] BidUpdateDto bidDto)
+        [HttpPut("{fileId}")]
+        public async Task<IActionResult> AcceptFile([FromHeader] string authorization, [FromRoute] string fileId, [FromBody] FileUpdateDto fileDto)
         {
-            if (bidId != bidDto.Id)
+            if (fileId != fileDto.Id)
                 return BadRequest(new MessageObj("Invalid id(s)"));
 
             if (!ModelState.IsValid)
                 return BadRequest(new { message = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
 
-            var updateBid = _mapper.Map<Bid>(bidDto);
+            var updateFile = _mapper.Map<File>(fileDto);
             try
             {
-                if (await _bidService.Accept(updateBid, authorization.Split(' ')[1]))
+                if (await _fileservice.Accept(updateFile, authorization.Split(' ') [1]))
                     return Ok();
-                throw new InvalidBid();
+                throw new InvalidFile();
             }
             catch (Exception e)
             {
@@ -86,36 +86,36 @@ namespace Application.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
-            var bids = await _bidRepository.Get();
-            var bidDtos = _mapper.Map<IList<BidDto>>(bids);
-            return Ok(bidDtos);
+            var files = await _fileRepository.Get();
+            var fileDtos = _mapper.Map<IList<FileDto>>(files);
+            return Ok(fileDtos);
         }
 
         [HttpGet("freelancer/{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetByFreelancerId(string id)
         {
-            var bids = await _bidRepository.GetByFreelancerId(id);
-            var bidsDto = _mapper.Map<IList<BidDto>>(bids);
-            return Ok(bidsDto);
+            var files = await _fileRepository.GetByFreelancerId(id);
+            var filesDto = _mapper.Map<IList<FileDto>>(files);
+            return Ok(filesDto);
         }
 
         [HttpGet("project/{projectId}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetByProjectId([FromRoute] string projectId)
         {
-            var bids = await _bidRepository.GetByProjectId(projectId);
-            var bidDtos = _mapper.Map<IList<BidDto>>(bids);
-            return Ok(bidDtos);
+            var files = await _fileRepository.GetByProjectId(projectId);
+            var fileDtos = _mapper.Map<IList<FileDto>>(files);
+            return Ok(fileDtos);
         }
 
         [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetById(string id)
         {
-            var bid = await _bidRepository.GetById(id);
-            var bidDto = _mapper.Map<BidDto>(bid);
-            return Ok(bidDto);
+            var file = await _fileRepository.GetById(id);
+            var fileDto = _mapper.Map<FileDto>(file);
+            return Ok(fileDto);
         }
 
         [HttpDelete("{id}")]
@@ -123,7 +123,7 @@ namespace Application.Controllers
         {
             try
             {
-                await _bidRepository.Remove(id);
+                await _fileRepository.Remove(id);
             }
             catch (Exception e)
             {

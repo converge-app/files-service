@@ -68,10 +68,10 @@ namespace Application
 
             var appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>();
             services.AddTokenValidation(appSettings.Secret);
-            services.AddScoped<IBidRepository, BidRepository>();
-            services.AddScoped<IBidService, BidService>();
+            services.AddScoped<IFileRepository, FileRepository>();
+            services.AddScoped<IFileservice, Fileservice>();
 
-            services.AddApiDocumentation("Biddings");
+            services.AddApiDocumentation("Files");
 
             services.AddHealthChecks();
         }
@@ -86,7 +86,7 @@ namespace Application
             app.UseRequestMiddleware();
 
             app.UseAuthentication();
-            app.UseApiDocumentation("Biddings");
+            app.UseApiDocumentation("Files");
 
             app.UseMvc();
         }

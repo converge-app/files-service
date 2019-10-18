@@ -7,7 +7,7 @@ namespace Application.Database
 {
     public interface IDatabaseContext
     {
-        IMongoCollection<Bid> Bids { get; }
+        IMongoCollection<File> Files { get; }
 
         bool IsConnectionOpen();
     }
@@ -23,7 +23,7 @@ namespace Application.Database
             _database = client.GetDatabase(settings.DatabaseName);
         }
 
-        public IMongoCollection<Bid> Bids => _database.GetCollection<Bid>("Bids");
+        public IMongoCollection<File> Files => _database.GetCollection<File>("Files");
 
         public bool IsConnectionOpen()
         {

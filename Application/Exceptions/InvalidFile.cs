@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Runtime.Serialization;
 
 namespace Application.Exceptions
 {
     [Serializable]
-    public class InvalidBid : Exception
+    public class InvalidFile : Exception
     {
         //
         // For guidelines regarding the creation of new exception types, see
@@ -13,22 +13,18 @@ namespace Application.Exceptions
         //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
         //
 
-        public InvalidBid()
-        {
-        }
+        public InvalidFile()
+        { }
 
-        public InvalidBid(string message) : base(message)
-        {
-        }
+        public InvalidFile(string message) : base(message)
+        { }
 
-        public InvalidBid(string message, Exception inner) : base(message, inner)
-        {
-        }
+        public InvalidFile(string message, Exception inner) : base(message, inner)
+        { }
 
-        protected InvalidBid(
+        protected InvalidFile(
             SerializationInfo info,
             StreamingContext context) : base(info, context)
-        {
-        }
-    } 
+        { }
+    }
 }
