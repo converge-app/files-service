@@ -45,6 +45,8 @@ spec:
               value: "const"
             - name: PROJECTS_SERVICE_HTTP
               value: projects-service-master
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: {{ .Values.application.googlecredentials }}
           ports:
             - containerPort: {{ .Values.web.port }}
           resources:

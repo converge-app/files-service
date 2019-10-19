@@ -59,6 +59,7 @@ deploy_production:
       --set web.name="files-service-${CI_COMMIT_REF_SLUG}"
       --set web.image="${IMAGE}"
       --set web.host="${URL_PRODUCTION}"
+      --set application.googlecredentials="${GOOGLE_APPLICATION_CREDENTIALS}"
       --wait
       --force
       files-service-${CI_COMMIT_REF_SLUG}

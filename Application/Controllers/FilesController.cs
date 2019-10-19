@@ -1,89 +1,72 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using Application.Exceptions;
-using Application.Helpers;
 using Application.Models.DataTransferObjects;
-using Application.Models.Entities;
 using Application.Repositories;
 using Application.Services;
-using Application.Utility;
-using Application.Utility.Exception;
 using Application.Utility.Models;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
+using MongoDB.Bson;
 
 namespace Application.Controllers
 {
     [Route("api/[controller]")]
     [Authorize]
-    public class FilesController : ControllerBase
+    public class FilesController : Controller
     {
         private readonly IMapper _mapper;
+        private readonly IHostingEnvironment _hostingEnvironment;
         private readonly IFileRepository _fileRepository;
-        private readonly IFileservice _fileservice;
+        private readonly IFileService _fileService;
 
-        public FilesController(IFileservice fileservice, IFileRepository fileRepository, IMapper mapper)
+        public FilesController(IFileService fileService, IFileRepository fileRepository, IMapper mapper,
+            IHostingEnvironment hostingEnvironment)
         {
-            _fileservice = fileservice;
+            _fileService = fileService;
             _fileRepository = fileRepository;
             _mapper = mapper;
+            _hostingEnvironment = hostingEnvironment;
         }
 
         [HttpPost]
-        public async Task<IActionResult> OpenFile([FromBody] FileCreationDto fileDto)
+        public async Task<IActionResult> UploadFile(IFormFile file)
         {
             if (!ModelState.IsValid)
-                return BadRequest(new { message = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
+                return BadRequest();
 
-            var createFile = _mapper.Map<File>(fileDto);
+            var userId = User.FindFirstValue(ClaimTypes.Name);
+
             try
             {
-                var createdFile = await _fileservice.Open(createFile);
-                return Ok(createdFile);
-            }
-            catch (UserNotFound)
-            {
-                return NotFound(new MessageObj("User not found"));
-            }
-            catch (EnvironmentNotSet)
-            {
-                throw;
+                if (file != null)
+                {
+                    string ext = Path.GetExtension(file.FileName);
+
+                    var newFile = new Application.Models.Entities.File
+                    {
+                        Id = ObjectId.GenerateNewId().ToString(),
+                        UserId = userId
+                    };
+
+                    var fileModel = await _fileService.UploadFile(newFile, file);
+                    return Ok(fileModel);
+                }
             }
             catch (Exception e)
             {
                 return BadRequest(new MessageObj(e.Message));
             }
-        }
 
-        [HttpPut("{fileId}")]
-        public async Task<IActionResult> AcceptFile([FromHeader] string authorization, [FromRoute] string fileId, [FromBody] FileUpdateDto fileDto)
-        {
-            if (fileId != fileDto.Id)
-                return BadRequest(new MessageObj("Invalid id(s)"));
-
-            if (!ModelState.IsValid)
-                return BadRequest(new { message = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
-
-            var updateFile = _mapper.Map<File>(fileDto);
-            try
-            {
-                if (await _fileservice.Accept(updateFile, authorization.Split(' ') [1]))
-                    return Ok();
-                throw new InvalidFile();
-            }
-            catch (Exception e)
-            {
-                return BadRequest(new MessageObj(e.Message));
-            }
+            return BadRequest(new MessageObj("Couldn't upload file'"));
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var files = await _fileRepository.Get();
@@ -91,46 +74,20 @@ namespace Application.Controllers
             return Ok(fileDtos);
         }
 
-        [HttpGet("freelancer/{id}")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetByFreelancerId(string id)
-        {
-            var files = await _fileRepository.GetByFreelancerId(id);
-            var filesDto = _mapper.Map<IList<FileDto>>(files);
-            return Ok(filesDto);
-        }
-
-        [HttpGet("project/{projectId}")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetByProjectId([FromRoute] string projectId)
-        {
-            var files = await _fileRepository.GetByProjectId(projectId);
-            var fileDtos = _mapper.Map<IList<FileDto>>(files);
-            return Ok(fileDtos);
-        }
-
         [HttpGet("{id}")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetById(string id)
+        public async Task<IActionResult> Get([FromRoute] string id)
         {
             var file = await _fileRepository.GetById(id);
             var fileDto = _mapper.Map<FileDto>(file);
             return Ok(fileDto);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetByUserId([FromRoute] string userId)
         {
-            try
-            {
-                await _fileRepository.Remove(id);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(new MessageObj(e.Message));
-            }
-
-            return Ok();
+            var file = await _fileRepository.GetById(userId);
+            var fileDto = _mapper.Map<FileDto>(file);
+            return Ok(fileDto);
         }
     }
 }

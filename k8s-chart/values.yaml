@@ -12,3 +12,6 @@ mongodb:
   mongodbDatabase: ApplicationDb
   mongodbUsername: application
   mongodbPassword: password
+
+application:
+  googlecredentials: 'Enter your credentials here'

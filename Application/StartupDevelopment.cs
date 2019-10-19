@@ -69,7 +69,7 @@ namespace Application
             var appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>();
             services.AddTokenValidation(appSettings.Secret);
             services.AddScoped<IFileRepository, FileRepository>();
-            services.AddScoped<IFileservice, Fileservice>();
+            services.AddScoped<IFileService, FileService>();
 
             services.AddApiDocumentation("Files");
 

@@ -5,17 +5,9 @@ namespace Application.Models.DataTransferObjects
 {
     public class FileDto
     {
-        [Required]
         public string Id { get; set; }
-
-        [Required]
-        public string ProjectId { get; set; }
-
-        [Required]
-        public string FreelancerId { get; set; }
-        public string Message { get; set; }
-
-        [Required]
-        public decimal Amount { get; set; }
+        
+        public string BucketLink { get; set; }
+        public string UserId { get; set; }
     }
 }

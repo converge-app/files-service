@@ -10,8 +10,6 @@ namespace Application.Helpers
         {
             CreateMap<File, FileDto>();
             CreateMap<FileDto, File>();
-            CreateMap<FileUpdateDto, File>();
-            CreateMap<FileCreationDto, File>();
         }
     }
 }

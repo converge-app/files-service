@@ -344,3 +344,4 @@ MigrationBackup/
 .vscode
 start-mongo.sh
 start-mongo.sh
+credentials.json
